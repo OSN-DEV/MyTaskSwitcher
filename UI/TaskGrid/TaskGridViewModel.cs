@@ -125,10 +125,19 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private void GetTasks() {
             this._itemList.Clear();
             this._index = 0;
+
+            // test
+            var excludeList = new List<string> { "SystemSettings", "TextInputHost", "ApplicationFrameHost" };
+
             Process[] processes = Process.GetProcesses();
             foreach (var p in processes) {
                 if (0 < p.MainWindowTitle.Length) {
                     if (p.MainWindowTitle.StartsWith("MyTaskSwither")) {
+                        continue;
+                    }
+
+                    Debug.WriteLine($"{p.ProcessName}:{p.MainWindowTitle}");
+                    if (-1 != excludeList.IndexOf(p.ProcessName)) {
                         continue;
                     }
 
@@ -171,13 +180,9 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             for (int i = 0; i < ItemCountPerPage; i++) {
                 var item = this._itemList[i + offset];
                 item.Index = i;
-                //if (IntPtr.Zero == item.Handle) {
-                //    break;
-                //}
                 this.ItemList[i] = this._itemList[i];
             }
             this.PageData = $"{index + 1}/{this._maxIndex + 1}";
-  //          base.SetProperty(nameof(ItemList));
         }
 
         /// <summary>
