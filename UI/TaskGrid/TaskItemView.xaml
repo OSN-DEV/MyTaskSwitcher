@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="MyTaskSwitcher.UI.TaskGrid.TaskItemView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:MyTaskSwitcher.UI.TaskGrid"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="100"
+             Name="Main">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/MyTaskSwitcher;component/Component/Generic.xaml"  />
+            </ResourceDictionary.MergedDictionaries>
+            <Style TargetType="Button">
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Foreground" Value="Transparent"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="Transparent" />
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition  />
+        </Grid.RowDefinitions>
+        <TextBlock Name="cKey" Grid.ColumnSpan="2" HorizontalAlignment="Center" VerticalAlignment="Bottom" Text="{Binding Path=Key, ElementName=Main}" />
+
+        <Image Name="cIcon" Grid.Column="0" Grid.Row="1" Width="16" Height="16" Source="{Binding Path=Icon, ElementName=Main}"/>
+        <!--<TextBlock Name="cTitle" Grid.Column="1" Grid.Row="1" Width="80" TextTrimming="CharacterEllipsis" FontSize="10" Text="{Binding Path=Title, ElementName=Main}"/>-->
+        <TextBox Name="cTitle" Grid.Column="1" Grid.Row="1" Width="80"  FontSize="10" MaxLines="2" AcceptsReturn="true" TextWrapping="Wrap" Text="{Binding Path=Title, ElementName=Main}" Background="Transparent" BorderBrush="Transparent"/>
+        <Button Name="cItem" Grid.RowSpan="2" Grid.ColumnSpan="2" 
+                Command="{Binding Path=MyCommand, ElementName=Main}"
+                CommandParameter="{Binding Path=MyCommandParam, ElementName=Main}"
+                />
+    </Grid>
+</UserControl>
