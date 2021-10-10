@@ -171,12 +171,13 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             for (int i = 0; i < ItemCountPerPage; i++) {
                 var item = this._itemList[i + offset];
                 item.Index = i;
-                if (IntPtr.Zero == item.Handle) {
-                    break;
-                }
+                //if (IntPtr.Zero == item.Handle) {
+                //    break;
+                //}
                 this.ItemList[i] = this._itemList[i];
             }
             this.PageData = $"{index + 1}/{this._maxIndex + 1}";
+  //          base.SetProperty(nameof(ItemList));
         }
 
         /// <summary>
