@@ -22,6 +22,7 @@ namespace MyTaskSwitcher.Func {
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = false)]
         public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
         #endregion
 
         #region Declartion - Constant
@@ -33,6 +34,8 @@ namespace MyTaskSwitcher.Func {
         public const int ICON_SMALL2 = 2;
 
         public const int WM_GETICON = 0x7F;
+
+
         #endregion
 
         #region Method

@@ -11,10 +11,100 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Media.Imaging;
-
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace MyTaskSwitcher.UI.TaskGrid {
     public class TaskGridViewModel : BaseBindable {
+
+        #region Win32 API
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnumWindows(EnumWindowsDelegate lpEnumFunc, IntPtr lparam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetWindowTextLength(IntPtr hWnd);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
+
+        //[DllImport("user32.dll")]
+        //public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+        [DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
+        private static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", SetLastError = true)]
+        private static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+        [DllImport("dwmapi.dll")]
+        public static extern long DwmGetWindowAttribute(IntPtr hWnd, DWMWINDOWATTRIBUTE dwAttribute, out IntPtr pvAttribute, int cbAttribute);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetWindow(IntPtr hWnd, int wCmd);
+
+        [DllImport("User32.Dll")]
+        public static extern IntPtr GetParent(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern int GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+
+        public delegate bool EnumWindowsDelegate(IntPtr hWnd, IntPtr lparam);
+
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT {
+            public int left;
+            public int top;
+            public int right;
+            public int bottom;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct WINDOWINFO {
+            public int cbSize;
+            public RECT rcWindow;
+            public RECT rcClient;
+            public int dwStyle;
+            public int dwExStyle;
+            public int dwWindowStatus;
+            public uint cxWindowBorders;
+            public uint cyWindowBorders;
+            public short atomWindowType;
+            public short wCreatorVersion;
+        }
+
+        public enum DWMWINDOWATTRIBUTE {
+            DWMWA_NCRENDERING_ENABLED = 1,
+            DWMWA_NCRENDERING_POLICY,
+            DWMWA_TRANSITIONS_FORCEDISABLED,
+            DWMWA_ALLOW_NCPAINT,
+            DWMWA_CAPTION_BUTTON_BOUNDS,
+            DWMWA_NONCLIENT_RTL_LAYOUT,
+            DWMWA_FORCE_ICONIC_REPRESENTATION,
+            DWMWA_FLIP3D_POLICY,
+            DWMWA_EXTENDED_FRAME_BOUNDS,//ウィンドウのRect
+            DWMWA_HAS_ICONIC_BITMAP,
+            DWMWA_DISALLOW_PEEK,
+            DWMWA_EXCLUDED_FROM_PEEK,
+            DWMWA_CLOAK,
+            DWMWA_CLOAKED,      // EnumWindowsで見えないUWPアプリを除外
+            DWMWA_FREEZE_REPRESENTATION,
+            DWMWA_LAST
+        };
+
+        private const int GWL_STYLE = -16;
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_VISIBLE = 0x10000000;
+        private const int WS_EX_TOOLWINDOW = 0x00000080;
+        private const long WS_EX_NOREDIRECTIONBITMAP = 0x00200000L;
+        private const int GW_OWNER = 4;
+        #endregion
 
         #region Declaration
         private int _index = 0;
@@ -122,51 +212,194 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// <summary>
         /// get task list
         /// </summary>
+        //private void GetTasks() {
+        //    this._itemList.Clear();
+        //    this._index = 0;
+
+        //    // test
+        //    var excludeList = new List<string> { "SystemSettings", "TextInputHost", "ApplicationFrameHost" };
+
+        //    Process[] processes = Process.GetProcesses();
+        //    foreach (var p in processes) {
+        //        if (0 < p.MainWindowTitle.Length) {
+        //            if (p.MainWindowTitle.StartsWith("MyTaskSwither")) {
+        //                continue;
+        //            }
+
+        //            Debug.WriteLine($"{p.ProcessName}:{p.MainWindowTitle}");
+        //            if (-1 != excludeList.IndexOf(p.ProcessName)) {
+        //                continue;
+        //            }
+
+        //            var iconFile = $"{Constant.IconCache}\\{p.ProcessName}";
+        //            if (!File.Exists(iconFile)) {
+        //                var icon = GetAppIcon(p.MainWindowHandle);
+
+        //                if (File.Exists(iconFile)) {
+        //                    File.Delete(iconFile);
+        //                }
+        //                if (null == icon) {
+        //                    continue;
+        //                }
+        //                icon.ToBitmap().Save(iconFile, ImageFormat.Png);
+        //            }
+        //            var item = new TaskItem(p.MainWindowHandle, p.MainWindowTitle);
+        //            item.Icon = this.GetBitmapSource(iconFile);
+        //            this._itemList.Add(item);
+        //        }
+        //    }
+
+        //    var rest = this._itemList.Count % ItemCountPerPage;
+        //    if (0 < rest) {
+        //        rest = ItemCountPerPage - rest;
+        //    }
+        //    for (int i = 0; i < rest; i++) {
+        //        this._itemList.Add(new TaskItem());
+        //    }
+        //    this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
+        //}
+
         private void GetTasks() {
             this._itemList.Clear();
             this._index = 0;
 
-            // test
-            var excludeList = new List<string> { "SystemSettings", "TextInputHost", "ApplicationFrameHost" };
+            EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
 
-            Process[] processes = Process.GetProcesses();
-            foreach (var p in processes) {
-                if (0 < p.MainWindowTitle.Length) {
-                    if (p.MainWindowTitle.StartsWith("MyTaskSwither")) {
-                        continue;
-                    }
+            //// test
+            //var excludeList = new List<string> { "SystemSettings", "TextInputHost", "ApplicationFrameHost" };
 
-                    Debug.WriteLine($"{p.ProcessName}:{p.MainWindowTitle}");
-                    if (-1 != excludeList.IndexOf(p.ProcessName)) {
-                        continue;
-                    }
+            //Process[] processes = Process.GetProcesses();
+            //foreach (var p in processes) {
+            //    if (0 < p.MainWindowTitle.Length) {
+            //        if (p.MainWindowTitle.StartsWith("MyTaskSwither")) {
+            //            continue;
+            //        }
 
-                    var iconFile = $"{Constant.IconCache}\\{p.ProcessName}";
-                    if (!File.Exists(iconFile)) {
-                        var icon = GetAppIcon(p.MainWindowHandle);
+            //        Debug.WriteLine($"{p.ProcessName}:{p.MainWindowTitle}");
+            //        if (-1 != excludeList.IndexOf(p.ProcessName)) {
+            //            continue;
+            //        }
 
-                        if (File.Exists(iconFile)) {
-                            File.Delete(iconFile);
-                        }
-                        if (null == icon) {
-                            continue;
-                        }
-                        icon.ToBitmap().Save(iconFile, ImageFormat.Png);
-                    }
-                    var item = new TaskItem(p.MainWindowHandle, p.MainWindowTitle);
-                    item.Icon = this.GetBitmapSource(iconFile);
-                    this._itemList.Add(item);
+            //        var iconFile = $"{Constant.IconCache}\\{p.ProcessName}";
+            //        if (!File.Exists(iconFile)) {
+            //            var icon = GetAppIcon(p.MainWindowHandle);
+
+            //            if (File.Exists(iconFile)) {
+            //                File.Delete(iconFile);
+            //            }
+            //            if (null == icon) {
+            //                continue;
+            //            }
+            //            icon.ToBitmap().Save(iconFile, ImageFormat.Png);
+            //        }
+            //        var item = new TaskItem(p.MainWindowHandle, p.MainWindowTitle);
+            //        item.Icon = this.GetBitmapSource(iconFile);
+            //        this._itemList.Add(item);
+            //    }
+            //}
+
+            //var rest = this._itemList.Count % ItemCountPerPage;
+            //if (0 < rest) {
+            //    rest = ItemCountPerPage - rest;
+            //}
+            //for (int i = 0; i < rest; i++) {
+            //    this._itemList.Add(new TaskItem());
+            //}
+            //this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
+        }
+
+
+        private  bool EnumWindowCallBack(IntPtr hWnd, IntPtr lparam) {
+
+            int textLen = GetWindowTextLength(hWnd);
+            if (0 == textLen) {
+                return true;
+            }
+
+            bool hasOwner = ((IntPtr)0 != GetWindow(hWnd, GW_OWNER));
+            bool isChild = ((IntPtr)0 != GetParent(hWnd));
+            if (IsWindowAvailable(hWnd) && !hasOwner && !isChild) {
+                StringBuilder tsb = new StringBuilder(textLen + 1);
+                GetWindowText(hWnd, tsb, tsb.Capacity);
+                Console.WriteLine("タイトル:" + tsb.ToString());
+
+                var wi = new WINDOWINFO();
+                if (0 != GetWindowInfo(hWnd, ref wi)) {
+                    StringBuilder csb = new StringBuilder(256);
+                    GetClassName(hWnd, csb, csb.Capacity);
+
+                    // Console.WriteLine("クラス名:" + csb.ToString());
+                    //int textLen = GetWindowTextLength(hWnd);
+                    //if (0 < textLen) {
+                    //    StringBuilder tsb = new StringBuilder(textLen + 1);
+                    //    GetWindowText(hWnd, tsb, tsb.Capacity);
+                    //    Console.WriteLine("タイトル:" + tsb.ToString());
+                    //} else {
+                    //    //                        Console.WriteLine("No タイトル:");
+                    //}
                 }
             }
+            
 
-            var rest = this._itemList.Count % ItemCountPerPage;
-            if (0 < rest) {
-                rest = ItemCountPerPage - rest;
+            ////ウィンドウのタイトルの長さを取得する
+            //int textLen = GetWindowTextLength(hWnd);
+            //if (0 < textLen) {
+            //    //ウィンドウのタイトルを取得する
+            //    StringBuilder tsb = new StringBuilder(textLen + 1);
+            //    GetWindowText(hWnd, tsb, tsb.Capacity);
+
+            //    //ウィンドウのクラス名を取得する
+            //    StringBuilder csb = new StringBuilder(256);
+            //    GetClassName(hWnd, csb, csb.Capacity);
+
+            //    //結果を表示する
+            //    Console.WriteLine("クラス名:" + csb.ToString());
+            //    Console.WriteLine("タイトル:" + tsb.ToString());
+            //}
+
+            //すべてのウィンドウを列挙する
+            return true;
+        }
+
+        //列挙対象のウインドウである
+        bool IsWindowAvailable(IntPtr hWnd) {
+            RECT rc = new RECT();
+            GetWindowRect(hWnd, out rc);
+
+            // bool isVisible = ((long)GetWindowLongPtr(hWnd, GWL_STYLE) & WS_VISIBLE) == WS_VISIBLE; // 可視状態
+            bool isVisible = ((long)GetWindowLongPtr(hWnd, GWL_STYLE) & WS_VISIBLE) != 0; // 可視状態
+            // bool isToolWindow = ((int)GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) == WS_EX_TOOLWINDOW; // ツールウインドウ
+            bool isToolWindow = ((int)GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) != 0; // ツールウインドウ
+
+            if (isVisible && !isToolWindow && (0 != rc.right- rc.left) && (0 != rc.bottom - rc.top)) {
+            //    Console.WriteLine(GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_NOREDIRECTIONBITMAP);
+
+                // bool isRendered = ((int)GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_NOREDIRECTIONBITMAP) == WS_EX_NOREDIRECTIONBITMAP;
+                bool isRendered = ((int)GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_NOREDIRECTIONBITMAP) != 0;
+//                 Console.WriteLine("isRendered:" + isRendered);
+                if (isRendered) {
+                    var result = DwmGetWindowAttribute(hWnd, DWMWINDOWATTRIBUTE.DWMWA_CLOAKED, out IntPtr isCloaked, Marshal.SizeOf(typeof(bool)));
+                    if (result != 0) {
+                        Console.WriteLine("result:" + result);
+                        return false;
+                    }
+                    // Console.WriteLine("isCloaked:" + isCloaked);
+                    if ((IntPtr)0 != isCloaked) {
+                        return false;
+                    }
+                    return true;
+                }
+                return true;
             }
-            for (int i = 0; i < rest; i++) {
-                this._itemList.Add(new TaskItem());
-            }
-            this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
+            return false;
+        }
+
+
+        private long GetWindowLongPtr(IntPtr hWnd, int nIndex) {
+            if (IntPtr.Size == 8)
+                return GetWindowLongPtr64(hWnd, nIndex).ToInt64();
+            else
+                return GetWindowLongPtr32(hWnd, nIndex).ToInt32();
         }
 
         /// <summary>
@@ -175,6 +408,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// <param name="index"></param>
         private void ShowPage(int index) {
             // this.ItemList.Clear();
+            return;
 
             var offset = index * ItemCountPerPage;
             for (int i = 0; i < ItemCountPerPage; i++) {
