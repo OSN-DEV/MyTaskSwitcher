@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyTaskSwitcher.UI.TaskGrid"
         mc:Ignorable="d"
-        Title="TaskGridWindow" Height="280" Width="430" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown">
+        Title="TaskGridWindow" Height="280" Width="430" MaxHeight="400" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -20,11 +20,66 @@
             <Style TargetType="StackPanel">
                 <Setter Property="Margin" Value="5"/>
             </Style>
+
+            <Style x:Key="listBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+                <Setter Property="Padding" Value="0,4" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="Height" Value="30" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="{x:Type ContentControl}">
+                            <Border Background="{TemplateBinding Background}">
+                                <ContentPresenter />
+                            </Border>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+                <Style.Triggers>
+                    <Trigger Property="IsSelected" Value="True" >
+                        <Setter Property="Background" Value="#FFE6E0E0" />
+                        <Setter Property="BorderBrush" Value="#FFE6E0E0" />
+                        <Setter Property="Foreground" Value="{StaticResource DefaultTextForeground}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
-    <StackPanel Orientation="Vertical">
-        <StackPanel Orientation="Horizontal">
+    <!--<StackPanel Orientation="Vertical">-->
+
+
+
+        <ListView Name="cData" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" Margin="0,0,0,5" >
+            <ListView.ItemContainerStyle>
+                <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                    <Image Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}" />
+                    <TextBlock Background="Bisque" Grid.Column="1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" Width="100" VerticalAlignment="Center"  />
+                </Grid>
+                    <!--<StackPanel>
+                        <StackPanel Orientation="Horizontal" >
+                            <Image Width="16" Height="16" Source="{Binding Icon}" />
+                            <TextBlock Text="{Binding Title}" />
+                            <TextBlock Text="{Binding xx}" />
+                        </StackPanel>
+                    </StackPanel>-->
+                </DataTemplate>
+            </ListView.ItemTemplate>
+
+        </ListView>
+
+
+
+
+        <!--<StackPanel Orientation="Horizontal">
             <local:TaskItemView Key="Q" Title="{Binding ItemList[0].Title}" Icon="{Binding ItemList[0].Icon}" 
                                 MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                 MyCommandParam ="{Binding ItemList[0].Index}" />
@@ -76,6 +131,6 @@
             <Button Content="← J" Grid.Column="0" Style="{StaticResource LabelButton}" Command="{Binding DataContext.PrevPageClickCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
             <TextBlock Text="{Binding PageData}" Grid.Column="1" TextAlignment="Center"/>
             <Button Content="K →" Grid.Column="2" Style="{StaticResource LabelButton}" Command="{Binding DataContext.NextPageClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"  />
-        </Grid>
-    </StackPanel>
+        </Grid>-->
+    <!--</StackPanel>-->
 </control:ResidentWindow>
