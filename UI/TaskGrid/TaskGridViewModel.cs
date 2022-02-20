@@ -211,55 +211,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
 
         #region Private Method
         /// <summary>
-        /// get task list
+        /// 
         /// </summary>
-        //private void GetTasks() {
-        //    this._itemList.Clear();
-        //    this._index = 0;
-
-        //    // test
-        //    var excludeList = new List<string> { "SystemSettings", "TextInputHost", "ApplicationFrameHost" };
-
-        //    Process[] processes = Process.GetProcesses();
-        //    foreach (var p in processes) {
-        //        if (0 < p.MainWindowTitle.Length) {
-        //            if (p.MainWindowTitle.StartsWith("MyTaskSwither")) {
-        //                continue;
-        //            }
-
-        //            Debug.WriteLine($"{p.ProcessName}:{p.MainWindowTitle}");
-        //            if (-1 != excludeList.IndexOf(p.ProcessName)) {
-        //                continue;
-        //            }
-
-        //            var iconFile = $"{Constant.IconCache}\\{p.ProcessName}";
-        //            if (!File.Exists(iconFile)) {
-        //                var icon = GetAppIcon(p.MainWindowHandle);
-
-        //                if (File.Exists(iconFile)) {
-        //                    File.Delete(iconFile);
-        //                }
-        //                if (null == icon) {
-        //                    continue;
-        //                }
-        //                icon.ToBitmap().Save(iconFile, ImageFormat.Png);
-        //            }
-        //            var item = new TaskItem(p.MainWindowHandle, p.MainWindowTitle);
-        //            item.Icon = this.GetBitmapSource(iconFile);
-        //            this._itemList.Add(item);
-        //        }
-        //    }
-
-        //    var rest = this._itemList.Count % ItemCountPerPage;
-        //    if (0 < rest) {
-        //        rest = ItemCountPerPage - rest;
-        //    }
-        //    for (int i = 0; i < rest; i++) {
-        //        this._itemList.Add(new TaskItem());
-        //    }
-        //    this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
-        //}
-
         private void GetTasks() {
             this._itemList.Clear();
             this._index = 0;
@@ -278,7 +231,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         }
 
 
-        private  bool EnumWindowCallBack(IntPtr hWnd, IntPtr lparam) {
+        private bool EnumWindowCallBack(IntPtr hWnd, IntPtr lparam) {
 
             int textLen = GetWindowTextLength(hWnd);
             if (0 == textLen) {
@@ -288,46 +241,32 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             bool hasOwner = ((IntPtr)0 != GetWindow(hWnd, GW_OWNER));
             bool isChild = ((IntPtr)0 != GetParent(hWnd));
             if (IsWindowAvailable(hWnd) && !hasOwner && !isChild) {
-
-                //StringBuilder tsb = new StringBuilder(textLen + 1);
-                //GetWindowText(hWnd, tsb, tsb.Capacity);
-                //Console.WriteLine("タイトル:" + tsb.ToString());
-
-                //var wi = new WINDOWINFO();
-                //if (0 != GetWindowInfo(hWnd, ref wi)) {
-                //    StringBuilder csb = new StringBuilder(256);
-                //    GetClassName(hWnd, csb, csb.Capacity);
-
-                //    Console.WriteLine("クラス名:" + csb.ToString());
-                //    int textLen = GetWindowTextLength(hWnd);
-                //    if (0 < textLen) {
-                //        StringBuilder tsb = new StringBuilder(textLen + 1);
-                //        GetWindowText(hWnd, tsb, tsb.Capacity);
-                //        Console.WriteLine("タイトル:" + tsb.ToString());
-                //    } else {
-                //        //                        Console.WriteLine("No タイトル:");
-                //    }
-                //}
-
                 int processID;
-                Icon icon;
+                Icon icon = null;
                 Process process;
 
-                // ウィンドウハンドル→プロセスID
-                GetWindowThreadProcessId(hWnd, out processID);
-
-                // プロセスID→プロセス
-                process = Process.GetProcessById(processID);
+                
+                GetWindowThreadProcessId(hWnd, out processID);              // ウィンドウハンドル→プロセスID
+                if (processID == Process.GetCurrentProcess().Id) {
+                    // 自身は除外
+                    return true;
+                }
+                
+                process = Process.GetProcessById(processID);        // プロセスID→プロセス
 
                 // プロセス→実行ファイル名→アイコン
-                icon = System.Drawing.Icon.ExtractAssociatedIcon(process.MainModule.FileName);
-            
+                try {
+                    icon = System.Drawing.Icon.ExtractAssociatedIcon(process.MainModule.FileName);
+                } catch (Exception e) {
+                    Console.WriteLine(e.Message);
+                }
 
-
-            StringBuilder tsb = new StringBuilder(textLen + 1);
+                StringBuilder tsb = new StringBuilder(textLen + 1);
                 GetWindowText(hWnd, tsb, tsb.Capacity);
                 var item = new TaskItem(hWnd, tsb.ToString());
-                item.Icon = ConverToSource(icon.ToBitmap());
+                if (null != icon) {
+                    item.Icon = ConverToSource(icon.ToBitmap());
+                }
                 this._itemList.Add(item);
             }
 
