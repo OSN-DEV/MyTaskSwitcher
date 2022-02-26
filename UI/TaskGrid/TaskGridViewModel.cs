@@ -158,9 +158,9 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public TaskGridViewModel() {
 
             this.ItemList = new ObservableCollection<TaskItem>();
-            for (int i = 0; i < ItemCountPerPage; i++) {
-                this.ItemList.Add(new TaskItem());
-            }
+            //for (int i = 0; i < ItemCountPerPage; i++) {
+            //    this.ItemList.Add(new TaskItem());
+            //}
             this.TaskItemClickCommand = new DelegateCommandWithParam<int>(TaskItemClick);
             this.PrevPageClickCommand = new DelegateCommand(PreviousPageClick);
             this.NextPageClickCommand = new DelegateCommand(NextPageClick);
@@ -219,14 +219,14 @@ namespace MyTaskSwitcher.UI.TaskGrid {
 
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
 
-            var rest = this._itemList.Count % ItemCountPerPage;
-            if (0 < rest) {
-                rest = ItemCountPerPage - rest;
-            }
-            for (int i = 0; i < rest; i++) {
-                this._itemList.Add(new TaskItem());
-            }
-            this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
+            //var rest = this._itemList.Count % ItemCountPerPage;
+            //if (0 < rest) {
+            //    rest = ItemCountPerPage - rest;
+            //}
+            //for (int i = 0; i < rest; i++) {
+            //    this._itemList.Add(new TaskItem());
+            //}
+            //this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
             this.ShowPage(0);
         }
 
@@ -267,7 +267,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                 if (null != icon) {
                     item.Icon = ConverToSource(icon.ToBitmap());
                 }
-                this._itemList.Add(item);
+                // this._itemList.Add(item);
+                this.ItemList.Add(item);
             }
 
 
@@ -370,13 +371,13 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private void ShowPage(int index) {
             // this.ItemList.Clear();
 
-            var offset = index * ItemCountPerPage;
-            for (int i = 0; i < ItemCountPerPage; i++) {
-                var item = this._itemList[i + offset];
-                item.Index = i;
-                this.ItemList[i] = this._itemList[i];
-            }
-            this.PageData = $"{index + 1}/{this._maxIndex + 1}";
+            //var offset = index * ItemCountPerPage;
+            //for (int i = 0; i < ItemCountPerPage; i++) {
+            //    var item = this._itemList[i + offset];
+            //    item.Index = i;
+            //    this.ItemList[i] = this._itemList[i];
+            //}
+            //this.PageData = $"{index + 1}/{this._maxIndex + 1}";
         }
 
         /// <summary>
