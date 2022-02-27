@@ -7,17 +7,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyTaskSwitcher.UI.TaskGrid"
         mc:Ignorable="d"
-        Title="TaskGridWindow" Height="280" Width="430" MaxHeight="400" SizeToContent="Height"  WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown">
+        Title="TaskGridWindow" Height="280" Width="430" MaxHeight="400" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" StateChanged="ResidentWindow_StateChanged">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/MyTaskSwitcher;component/Component/Generic.xaml"  />
             </ResourceDictionary.MergedDictionaries>
-            <Style TargetType="StackPanel">
+            <!--<Style TargetType="StackPanel">
                 <Setter Property="Margin" Value="5"/>
-            </Style>
+            </Style>-->
 
             <Style x:Key="listBoxItemStyle" TargetType="{x:Type ListBoxItem}">
+                <EventSetter Event="MouseDoubleClick" Handler="ListViewItem_MouseDoubleClick"/>
                 <Setter Property="Padding" Value="0,10" />
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                 <Setter Property="Height" Value="35" />
@@ -38,9 +39,13 @@
                     </Trigger>
                 </Style.Triggers>
             </Style>
+            <Style TargetType="ListBoxItem">
+                
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
+    <StackPanel Orientation="Vertical">
     <ListView Name="cTaskList" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" >
         <ListView.ItemContainerStyle>
             <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
@@ -50,9 +55,12 @@
             <DataTemplate>
                 <StackPanel Orientation="Horizontal"  >
                     <Image Grid.Column="0" Grid.Row="0" Width="20" Height="20" Source="{Binding Icon}" Margin="5,0,10,0" />
-                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Title}" TextTrimming="CharacterEllipsis"  VerticalAlignment="Center"  Margin="0,0,5,0" FontFamily="Meiryo UI" FontSize="14"/>
+                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Title}" Width="370"  
+                               VerticalAlignment="Center"  Margin="0,0,5,0" FontFamily="Meiryo UI" FontSize="14"
+                               TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
             </DataTemplate>
         </ListView.ItemTemplate>
     </ListView>
+    </StackPanel>
 </control:ResidentWindow>

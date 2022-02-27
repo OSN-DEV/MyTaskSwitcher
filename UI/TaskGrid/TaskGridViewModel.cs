@@ -124,15 +124,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// select item command
         /// </summary>
         public DelegateCommandWithParam<int> TaskItemClickCommand { set; get; }
-
-        /// <summary>
-        /// page data
-        /// </summary>
-        private string _pageData;
-        public string PageData {
-            set { base.SetProperty(ref this._pageData, value); }
-            get { return this._pageData; }
-        }
         #endregion
 
         #region Constructor
@@ -149,6 +140,14 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public void GetTasks() {
             this.ItemList.Clear();
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="Key"></param>
+        public void TaskItemSelected(int index) {
+            this.TaskItemClick(index);
         }
         #endregion
 

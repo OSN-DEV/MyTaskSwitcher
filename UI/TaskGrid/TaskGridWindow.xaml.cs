@@ -1,7 +1,9 @@
 ﻿using OsnCsLib.Common;
 using OsnCsLib.WPFComponent.Control;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace MyTaskSwitcher.UI.TaskGrid {
     /// <summary>
@@ -28,30 +30,18 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     break;
                 case Key.Enter:
                     e.Handled = true;
+                    this._viewModel.TaskItemSelected(this.cTaskList.SelectedIndex);
                     break;
-                //case Key.J:
-                //    e.Handled = true;
-                //    this._viewModel.PreviousPageClick();
-                //    break;
-                //case Key.K:
-                //    e.Handled = true;
-                //    this._viewModel.NextPageClick();
-                //    break;
-                //case Key.Q:
-                //case Key.W:
-                //case Key.E:
-                //case Key.R:
-                //case Key.A:
-                //case Key.S:
-                //case Key.D:
-                //case Key.F:
-                //case Key.Z:
-                //case Key.X:
-                //case Key.C:
-                //case Key.V:
-                //    e.Handled = true;
-                //    this._viewModel.TaskItemPressed(e.Key.ToString().ToUpper());
-                //    break;
+            }
+        }
+
+        void ListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e) {
+            this._viewModel.TaskItemSelected(this.cTaskList.SelectedIndex);
+        }
+
+        private void ResidentWindow_StateChanged(object sender, System.EventArgs e) {
+            if (this.WindowState == WindowState.Normal) {
+                SetListViewFocus();
             }
         }
         #endregion
@@ -76,6 +66,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             // event
             this.Loaded += (sender, e) => {
                 this.Title = appName;
+                this.SetListViewFocus();
+                this.SetWindowsState(true);
             };
             this.Closing += (sender, e) => {
                 this.ExitApp();
@@ -94,10 +86,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// </summary>
         protected override void OnHotkeyPressed() {
             this._viewModel.GetTasks();
-            if (0 < this.cTaskList.Items.Count) {
-                this.cTaskList.SelectedIndex = 0;
-            }
-            this.cTaskList.Focus();
+            this.SetListViewFocus();
             base.OnHotkeyPressed();
 
         }
@@ -109,6 +98,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// </summary>
         private void ShowTaskList() {
             base.SetWindowsState(false);
+
         }
 
         /// <summary>
@@ -117,6 +107,37 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private void ExitApp() {
             Application.Current.Shutdown();
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private void SetListViewFocus() {
+            if (0 == this.cTaskList.Items.Count) {
+                return;
+            }
+            this.cTaskList.SelectedIndex = 0;
+            this.cTaskList.Focus();
+            DoEvents();
+            var item = (ListViewItem)(this.cTaskList.ItemContainerGenerator.ContainerFromItem(cTaskList.SelectedItem));
+            if (null != item) {
+                item.Focus();
+                DoEvents();
+            }
+
+        }
+
+        private void DoEvents() {
+            DispatcherFrame frame = new DispatcherFrame();
+            var callback = new DispatcherOperationCallback(ExitFrames);
+            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background, callback, frame);
+            Dispatcher.PushFrame(frame);
+        }
+        private object ExitFrames(object obj) {
+            ((DispatcherFrame)obj).Continue = false;
+            return null;
+        }
         #endregion
+
+
     }
 }
