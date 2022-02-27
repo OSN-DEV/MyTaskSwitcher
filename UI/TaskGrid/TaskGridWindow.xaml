@@ -7,24 +7,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyTaskSwitcher.UI.TaskGrid"
         mc:Ignorable="d"
-        Title="TaskGridWindow" Height="280" Width="430" MaxHeight="400" SizeToContent="Height" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown">
+        Title="TaskGridWindow" Height="280" Width="430" MaxHeight="400" SizeToContent="Height"  WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="/MyTaskSwitcher;component/Component/Generic.xaml"  />
             </ResourceDictionary.MergedDictionaries>
-            <Style TargetType="local:TaskItemView">
-                <Setter Property="Width" Value="100" />
-                <Setter Property="Height" Value="50" />
-            </Style>
             <Style TargetType="StackPanel">
                 <Setter Property="Margin" Value="5"/>
             </Style>
 
             <Style x:Key="listBoxItemStyle" TargetType="{x:Type ListBoxItem}">
-                <Setter Property="Padding" Value="0,4" />
+                <Setter Property="Padding" Value="0,10" />
                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                <Setter Property="Height" Value="30" />
+                <Setter Property="Height" Value="35" />
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type ContentControl}">
@@ -45,92 +41,18 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <!--<StackPanel Orientation="Vertical">-->
+    <ListView Name="cTaskList" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" >
+        <ListView.ItemContainerStyle>
+            <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
+        </ListView.ItemContainerStyle>
 
-
-
-        <ListView Name="cData" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" Margin="0,0,0,5" >
-            <ListView.ItemContainerStyle>
-                <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
-            </ListView.ItemContainerStyle>
-
-            <ListView.ItemTemplate>
-                <DataTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                        <ColumnDefinition />
-                        <ColumnDefinition />
-                        </Grid.ColumnDefinitions>
-                    <Image Grid.Column="0" Width="16" Height="16" Source="{Binding Icon}" />
-                    <TextBlock Background="Bisque" Grid.Column="1" Text="{Binding Title}" TextTrimming="CharacterEllipsis" Width="100" VerticalAlignment="Center"  />
-                </Grid>
-                    <!--<StackPanel>
-                        <StackPanel Orientation="Horizontal" >
-                            <Image Width="16" Height="16" Source="{Binding Icon}" />
-                            <TextBlock Text="{Binding Title}" />
-                            <TextBlock Text="{Binding xx}" />
-                        </StackPanel>
-                    </StackPanel>-->
-                </DataTemplate>
-            </ListView.ItemTemplate>
-
-        </ListView>
-
-
-
-
-        <!--<StackPanel Orientation="Horizontal">
-            <local:TaskItemView Key="Q" Title="{Binding ItemList[0].Title}" Icon="{Binding ItemList[0].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[0].Index}" />
-            <local:TaskItemView Key="W" Title="{Binding ItemList[1].Title}" Icon="{Binding ItemList[1].Icon}"
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[1].Index}" />
-            <local:TaskItemView Key="E" Title="{Binding ItemList[2].Title}" Icon="{Binding ItemList[2].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[2].Index}" />
-            <local:TaskItemView Key="R" Title="{Binding ItemList[3].Title}" Icon="{Binding ItemList[3].Icon}"
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[3].Index}" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <local:TaskItemView Key="A" Title="{Binding ItemList[4].Title}" Icon="{Binding ItemList[4].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[4].Index}" />
-            <local:TaskItemView Key="S" Title="{Binding ItemList[5].Title}" Icon="{Binding ItemList[5].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[5].Index}" />
-            <local:TaskItemView Key="D" Title="{Binding ItemList[6].Title}" Icon="{Binding ItemList[6].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[6].Index}" />
-            <local:TaskItemView Key="F" Title="{Binding ItemList[7].Title}" Icon="{Binding ItemList[7].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[7].Index}" />
-        </StackPanel>
-        <StackPanel Orientation="Horizontal">
-            <local:TaskItemView Key="Z" Title="{Binding ItemList[8].Title}" Icon="{Binding ItemList[8].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[8].Index}" />
-            <local:TaskItemView Key="X" Title="{Binding ItemList[9].Title}" Icon="{Binding ItemList[9].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[9].Index}" />
-            <local:TaskItemView Key="C" Title="{Binding ItemList[10].Title}" Icon="{Binding ItemList[10].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[10].Index}" />
-            <local:TaskItemView Key="V" Title="{Binding ItemList[11].Title}" Icon="{Binding ItemList[11].Icon}" 
-                                MyCommand="{Binding DataContext.TaskItemClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                MyCommandParam ="{Binding ItemList[11].Index}" />
-
-        </StackPanel>
-        <Grid Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Button Content="← J" Grid.Column="0" Style="{StaticResource LabelButton}" Command="{Binding DataContext.PrevPageClickCommand, RelativeSource={RelativeSource AncestorType=Window}}" />
-            <TextBlock Text="{Binding PageData}" Grid.Column="1" TextAlignment="Center"/>
-            <Button Content="K →" Grid.Column="2" Style="{StaticResource LabelButton}" Command="{Binding DataContext.NextPageClickCommand, RelativeSource={RelativeSource AncestorType=Window}}"  />
-        </Grid>-->
-    <!--</StackPanel>-->
+        <ListView.ItemTemplate>
+            <DataTemplate>
+                <StackPanel Orientation="Horizontal"  >
+                    <Image Grid.Column="0" Grid.Row="0" Width="20" Height="20" Source="{Binding Icon}" Margin="5,0,10,0" />
+                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Title}" TextTrimming="CharacterEllipsis"  VerticalAlignment="Center"  Margin="0,0,5,0" FontFamily="Meiryo UI" FontSize="14"/>
+                </StackPanel>
+            </DataTemplate>
+        </ListView.ItemTemplate>
+    </ListView>
 </control:ResidentWindow>

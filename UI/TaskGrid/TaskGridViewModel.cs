@@ -111,7 +111,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private int _index = 0;
         private int _maxIndex = 0;
         private const int ItemCountPerPage = 12;
-        private List<TaskItem> _itemList = new List<TaskItem>();
+        //private List<TaskItem> _itemList = new List<TaskItem>();
 
         /// <summary>
         /// task item click event
@@ -156,7 +156,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
 
         #region Constructor
         public TaskGridViewModel() {
-
             this.ItemList = new ObservableCollection<TaskItem>();
             //for (int i = 0; i < ItemCountPerPage; i++) {
             //    this.ItemList.Add(new TaskItem());
@@ -214,19 +213,9 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// 
         /// </summary>
         private void GetTasks() {
-            this._itemList.Clear();
             this._index = 0;
-
+            this.ItemList.Clear();
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
-
-            //var rest = this._itemList.Count % ItemCountPerPage;
-            //if (0 < rest) {
-            //    rest = ItemCountPerPage - rest;
-            //}
-            //for (int i = 0; i < rest; i++) {
-            //    this._itemList.Add(new TaskItem());
-            //}
-            //this._maxIndex = this._itemList.Count / ItemCountPerPage - 1;
             this.ShowPage(0);
         }
 

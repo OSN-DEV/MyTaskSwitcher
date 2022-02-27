@@ -26,29 +26,32 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     e.Handled = true;
                     base.SetWindowsState(true);
                     break;
-                case Key.J:
+                case Key.Enter:
                     e.Handled = true;
-                    this._viewModel.PreviousPageClick();
                     break;
-                case Key.K:
-                    e.Handled = true;
-                    this._viewModel.NextPageClick();
-                    break;
-                case Key.Q:
-                case Key.W:
-                case Key.E:
-                case Key.R:
-                case Key.A:
-                case Key.S:
-                case Key.D:
-                case Key.F:
-                case Key.Z:
-                case Key.X:
-                case Key.C:
-                case Key.V:
-                    e.Handled = true;
-                    this._viewModel.TaskItemPressed(e.Key.ToString().ToUpper());
-                    break;
+                //case Key.J:
+                //    e.Handled = true;
+                //    this._viewModel.PreviousPageClick();
+                //    break;
+                //case Key.K:
+                //    e.Handled = true;
+                //    this._viewModel.NextPageClick();
+                //    break;
+                //case Key.Q:
+                //case Key.W:
+                //case Key.E:
+                //case Key.R:
+                //case Key.A:
+                //case Key.S:
+                //case Key.D:
+                //case Key.F:
+                //case Key.Z:
+                //case Key.X:
+                //case Key.C:
+                //case Key.V:
+                //    e.Handled = true;
+                //    this._viewModel.TaskItemPressed(e.Key.ToString().ToUpper());
+                //    break;
             }
         }
         #endregion
