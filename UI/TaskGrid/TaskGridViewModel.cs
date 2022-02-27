@@ -2,12 +2,9 @@
 using MyTaskSwitcher.Func;
 using OsnCsLib.WPFComponent.Bind;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Media.Imaging;
@@ -32,8 +29,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         [DllImport("user32.dll")]
         private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
 
-        //[DllImport("user32.dll")]
-        //public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
         [DllImport("user32.dll", EntryPoint = "GetWindowLong", SetLastError = true)]
         private static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
 
@@ -108,10 +103,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         #endregion
 
         #region Declaration
-        private int _index = 0;
-        private int _maxIndex = 0;
-        private const int ItemCountPerPage = 12;
-        //private List<TaskItem> _itemList = new List<TaskItem>();
 
         /// <summary>
         /// task item click event
@@ -135,16 +126,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public DelegateCommandWithParam<int> TaskItemClickCommand { set; get; }
 
         /// <summary>
-        /// previous page click
-        /// </summary>
-        public DelegateCommand PrevPageClickCommand { set; get; }
-
-        /// <summary>
-        /// next page click
-        /// </summary>
-        public DelegateCommand NextPageClickCommand { set; get; }
-
-        /// <summary>
         /// page data
         /// </summary>
         private string _pageData;
@@ -157,54 +138,17 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         #region Constructor
         public TaskGridViewModel() {
             this.ItemList = new ObservableCollection<TaskItem>();
-            //for (int i = 0; i < ItemCountPerPage; i++) {
-            //    this.ItemList.Add(new TaskItem());
-            //}
             this.TaskItemClickCommand = new DelegateCommandWithParam<int>(TaskItemClick);
-            this.PrevPageClickCommand = new DelegateCommand(PreviousPageClick);
-            this.NextPageClickCommand = new DelegateCommand(NextPageClick);
         }
         #endregion
 
         #region Public Method
         /// <summary>
-        /// refresh task list
-        /// </summary>
-        public void Refresh() {
-            this.GetTasks();
-            this.ShowPage(0);
-        }
-
-        /// <summary>
-        /// show previous page
-        /// </summary>
-        public void PreviousPageClick() {
-            this._index--;
-            if (this._index < 0) {
-                this._index = this._maxIndex;
-            }
-            this.ShowPage(this._index);
-        }
-
-        /// <summary>
-        /// show next page
-        /// </summary>
-        public void NextPageClick() {
-            this._index++;
-            if (this._maxIndex < this._index) {
-                this._index = 0;
-            }
-            this.ShowPage(this._index);
-        }
-
-        /// <summary>
         /// 
         /// </summary>
-        /// <param name="Key"></param>
-        public void TaskItemPressed(string Key) {
-            var keys = new List<string> { "Q", "W", "E", "R", "A", "S", "D", "F","Z", "X","C", "V" };
-            var index =  keys.IndexOf(Key);
-            this.TaskItemClick(index);
+        public void GetTasks() {
+            this.ItemList.Clear();
+            EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
         }
         #endregion
 
@@ -212,14 +156,9 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// <summary>
         /// 
         /// </summary>
-        private void GetTasks() {
-            this._index = 0;
-            this.ItemList.Clear();
-            EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
-            this.ShowPage(0);
-        }
-
-
+        /// <param name="hWnd"></param>
+        /// <param name="lparam"></param>
+        /// <returns></returns>
         private bool EnumWindowCallBack(IntPtr hWnd, IntPtr lparam) {
 
             int textLen = GetWindowTextLength(hWnd);
@@ -230,12 +169,11 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             bool hasOwner = ((IntPtr)0 != GetWindow(hWnd, GW_OWNER));
             bool isChild = ((IntPtr)0 != GetParent(hWnd));
             if (IsWindowAvailable(hWnd) && !hasOwner && !isChild) {
-                int processID;
                 Icon icon = null;
                 Process process;
 
                 
-                GetWindowThreadProcessId(hWnd, out processID);              // ウィンドウハンドル→プロセスID
+                GetWindowThreadProcessId(hWnd, out int processID);              // ウィンドウハンドル→プロセスID
                 if (processID == Process.GetCurrentProcess().Id) {
                     // 自身は除外
                     return true;
@@ -265,10 +203,13 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             return true;
         }
 
-        //列挙対象のウインドウである
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="hWnd"></param>
+        /// <returns></returns>
         bool IsWindowAvailable(IntPtr hWnd) {
-            RECT rc = new RECT();
-            GetWindowRect(hWnd, out rc);
+            GetWindowRect(hWnd, out RECT rc);
 
             bool isVisible = ((long)GetWindowLongPtr(hWnd, GWL_STYLE) & WS_VISIBLE) != 0; // 可視状態
             bool isToolWindow = ((int)GetWindowLongPtr(hWnd, GWL_EXSTYLE) & WS_EX_TOOLWINDOW) != 0; // ツールウインドウ
@@ -290,56 +231,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             return false;
         }
 
-
-
-
-
-        ////あの手この手でアイコンを取得[小さい]
-        //HICON GetSmallIconFromWindow(HWND hWnd) {
-        //    HICON hIcon = NULL;
-
-        //    if (hWnd == NULL || IsHungAppWindow(hWnd)) return NULL;
-
-        //    if (!SendMessageTimeout(hWnd, WM_GETICON, ICON_SMALL, 0, SMTO_ABORTIFHUNG, 500, (PDWORD_PTR) & hIcon)) {
-        //        DWORD dwError = GetLastError();
-
-        //        if (dwError == ERROR_SUCCESS || dwError == ERROR_TIMEOUT) {
-        //            return LoadIcon(NULL, IDI_APPLICATION);
-        //        }
-        //    }
-        //    if (hIcon == NULL) {
-        //        hIcon = (HICON)GetClassLongPtr(hWnd, GCLP_HICONSM);
-        //    }
-        //    if (hIcon == NULL) {
-        //        HWND hParent = GetParent(hWnd);
-        //        if (IsWindowVisible(hParent)) return GetSmallIconFromWindow(hParent);
-        //    }
-        //    return hIcon;
-        //}
-
-        ////あの手この手でアイコンを取得[大きい]
-        //HICON GetLargeIconFromWindow(HWND hWnd) {
-        //    HICON hIcon = NULL;
-
-        //    if (hWnd == NULL || IsHungAppWindow(hWnd)) return NULL;
-
-        //    if (!SendMessageTimeout(hWnd, WM_GETICON, ICON_BIG, 0, SMTO_ABORTIFHUNG, 500, (PDWORD_PTR) & hIcon)) {
-        //        DWORD dwError = GetLastError();
-
-        //        if (dwError == ERROR_SUCCESS || dwError == ERROR_TIMEOUT) {
-        //            return LoadIcon(NULL, IDI_APPLICATION);
-        //        }
-        //    }
-        //    if (hIcon == NULL) {
-        //        hIcon = (HICON)GetClassLongPtr(hWnd, GCLP_HICON);
-        //    }
-        //    if (hIcon == NULL) {
-        //        HWND hParent = GetParent(hWnd);
-        //        if (IsWindowVisible(hParent)) return GetLargeIconFromWindow(hParent);
-        //    }
-        //    return hIcon;
-        //}
-
         /// <summary>
         /// 
         /// </summary>
@@ -354,22 +245,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         }
 
         /// <summary>
-        /// show data
-        /// </summary>
-        /// <param name="index"></param>
-        private void ShowPage(int index) {
-            // this.ItemList.Clear();
-
-            //var offset = index * ItemCountPerPage;
-            //for (int i = 0; i < ItemCountPerPage; i++) {
-            //    var item = this._itemList[i + offset];
-            //    item.Index = i;
-            //    this.ItemList[i] = this._itemList[i];
-            //}
-            //this.PageData = $"{index + 1}/{this._maxIndex + 1}";
-        }
-
-        /// <summary>
         /// task item click
         /// </summary>
         /// <param name="index"></param>
@@ -377,31 +252,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             Win32APIs.SetForegroundWindow(this.ItemList[index].Handle);
             this.OnTaskItemClickCallback?.Invoke(this, new EventArgs());
         }
-
-        /// <summary>
-        /// get app icon
-        /// </summary>
-        /// <param name="hwnd"></param>
-        /// <returns></returns>
-        private Icon GetAppIcon(IntPtr hwnd) {
-            IntPtr iconHandle = Win32APIs.SendMessage(hwnd, Win32APIs.WM_GETICON, Win32APIs.ICON_SMALL2, 0);
-            if (iconHandle == IntPtr.Zero)
-                iconHandle = Win32APIs.SendMessage(hwnd, Win32APIs.WM_GETICON, Win32APIs.ICON_SMALL, 0);
-            if (iconHandle == IntPtr.Zero)
-                iconHandle = Win32APIs.SendMessage(hwnd, Win32APIs.WM_GETICON, Win32APIs.ICON_BIG, 0);
-            if (iconHandle == IntPtr.Zero)
-                iconHandle = Win32APIs.GetClassLongPtr(hwnd, Win32APIs.GCL_HICON);
-            if (iconHandle == IntPtr.Zero)
-                iconHandle = Win32APIs.GetClassLongPtr(hwnd, Win32APIs.GCL_HICONSM);
-
-            if (iconHandle == IntPtr.Zero)
-                return null;
-
-            Icon icn = Icon.FromHandle(iconHandle);
-
-            return icn;
-        }
-
 
         /// <summary>
         /// Convert bitmap to bitmapsource
@@ -419,36 +269,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                         BitmapCreateOptions.None,
                         BitmapCacheOption.OnLoad
                     );
-            }
-            return bitmapSource;
-        }
-
-        /// get BitmapSource from file path
-        /// </summary>
-        /// <param name="data">image data</param>
-        /// <returns>BitmapSource</returns>
-        private BitmapSource GetBitmapSource(string file) {
-            BitmapSource bitmapSource = null;
-            try {
-                byte[] data;
-                using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read))
-                using (var memStream = new MemoryStream()) {
-                    stream.CopyTo(memStream);
-                    data = memStream.GetBuffer();
-                }
-
-                using (var stream = new MemoryStream(data)) {
-                    var bitmapDecoder = BitmapDecoder.Create(
-                                        stream,
-                                        BitmapCreateOptions.PreservePixelFormat,
-                                        BitmapCacheOption.OnLoad);
-                    // var writable = new WriteableBitmap(bitmapDecoder.Frames.Single());
-                    var writable = new WriteableBitmap(bitmapDecoder.Frames.First());
-                    writable.Freeze();
-                    bitmapSource = (BitmapSource)writable;
-                }
-            } catch (Exception ex) {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
             }
             return bitmapSource;
         }

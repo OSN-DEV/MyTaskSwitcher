@@ -93,7 +93,11 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// 
         /// </summary>
         protected override void OnHotkeyPressed() {
-            this._viewModel.Refresh();
+            this._viewModel.GetTasks();
+            if (0 < this.cTaskList.Items.Count) {
+                this.cTaskList.SelectedIndex = 0;
+            }
+            this.cTaskList.Focus();
             base.OnHotkeyPressed();
 
         }
@@ -104,9 +108,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// show task list view
         /// </summary>
         private void ShowTaskList() {
-            this._viewModel.Refresh();
             base.SetWindowsState(false);
-            
         }
 
         /// <summary>
