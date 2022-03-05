@@ -32,6 +32,12 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     e.Handled = true;
                     this._viewModel.TaskItemSelected(this.cTaskList.SelectedIndex);
                     break;
+                case Key.Delete:
+                    e.Handled = true;
+                    this._viewModel.CloseApp(this.cTaskList.SelectedIndex);
+                    this._viewModel.GetTasks();
+                    this.SetListViewFocus();
+                    break;
             }
         }
 
@@ -68,9 +74,25 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                 this.Title = appName;
                 this.SetListViewFocus();
                 this.SetWindowsState(true);
+                // this.SizeToContent = SizeToContent.Height;
             };
             this.Closing += (sender, e) => {
                 this.ExitApp();
+            };
+            this.ContentRendered += (s, e) => {
+                System.Diagnostics.Debug.WriteLine("ContentRendered");
+            };
+            bool ignoreActivate = true;
+
+            this.Activated += (sender, e) => {
+                if (ignoreActivate) {
+                    ignoreActivate = false;
+                    return;
+                }
+                this._viewModel.GetTasks();
+                this.SetListViewFocus();
+                base.OnHotkeyPressed();
+                
             };
 
             // set view model
@@ -85,8 +107,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// 
         /// </summary>
         protected override void OnHotkeyPressed() {
-            this._viewModel.GetTasks();
-            this.SetListViewFocus();
+            //this._viewModel.GetTasks();
+            //this.SetListViewFocus();
             base.OnHotkeyPressed();
 
         }
@@ -98,7 +120,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// </summary>
         private void ShowTaskList() {
             base.SetWindowsState(false);
-
         }
 
         /// <summary>

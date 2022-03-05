@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -26,6 +27,16 @@ namespace MyTaskSwitcher.Data {
         /// window handle
         /// </summary>
         public IntPtr Handle { set; get; }
+
+        /// <summary>
+        /// process
+        /// </summary>
+        public Process AppProcess { set; get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string SortKey { set; get; }
         #endregion
 
         #region  Constructor

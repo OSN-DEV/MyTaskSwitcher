@@ -140,6 +140,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public void GetTasks() {
             this.ItemList.Clear();
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
+            // Array.Sort(this.ItemList,);
         }
 
         /// <summary>
@@ -149,6 +150,23 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public void TaskItemSelected(int index) {
             this.TaskItemClick(index);
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="inde"></param>
+        public void CloseApp(int index) {
+            var process = ItemList[index].AppProcess;
+            process.Refresh();
+            if (process.HasExited) {
+                process.CloseMainWindow();
+                process.Close();
+            }
+
+            //this.ItemList[index].AppProcess.CloseMainWindow();
+            //this.ItemList[index].AppProcess.Close();
+        }
+
         #endregion
 
         #region Private Method
@@ -169,27 +187,24 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             bool isChild = ((IntPtr)0 != GetParent(hWnd));
             if (IsWindowAvailable(hWnd) && !hasOwner && !isChild) {
                 Icon icon = null;
-                Process process;
-
                 
                 GetWindowThreadProcessId(hWnd, out int processID);              // ウィンドウハンドル→プロセスID
                 if (processID == Process.GetCurrentProcess().Id) {
                     // 自身は除外
                     return true;
                 }
-                
-                process = Process.GetProcessById(processID);        // プロセスID→プロセス
-
-                // プロセス→実行ファイル名→アイコン
-                try {
-                    icon = System.Drawing.Icon.ExtractAssociatedIcon(process.MainModule.FileName);
-                } catch (Exception e) {
-                    Console.WriteLine(e.Message);
-                }
 
                 StringBuilder tsb = new StringBuilder(textLen + 1);
                 GetWindowText(hWnd, tsb, tsb.Capacity);
                 var item = new TaskItem(hWnd, tsb.ToString());
+                item.AppProcess = Process.GetProcessById(processID);        // プロセスID→プロセス
+                item.SortKey = item.AppProcess.MainModule.FileName;
+                // プロセス→実行ファイル名→アイコン
+                try {
+                    icon = System.Drawing.Icon.ExtractAssociatedIcon(item.AppProcess.MainModule.FileName);
+                } catch (Exception e) {
+                    Console.WriteLine(e.Message);
+                }
                 if (null != icon) {
                     item.Icon = ConverToSource(icon.ToBitmap());
                 }
