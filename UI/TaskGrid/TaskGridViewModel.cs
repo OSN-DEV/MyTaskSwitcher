@@ -50,6 +50,15 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
+        [DllImport("kernel32.dll")]
+        private static extern bool CloseHandle(IntPtr hHandle);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        [DllImport("kernel32.dll")]
+        static extern bool GetExitCodeThread(IntPtr hThread, out uint lpExitCode);
+
         private delegate bool EnumWindowsDelegate(IntPtr hWnd, IntPtr lparam);
 
 
@@ -100,6 +109,20 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const long WS_EX_NOREDIRECTIONBITMAP = 0x00200000L;
         private const int GW_OWNER = 4;
+
+        const int SW_HIDE = 0;              //ウィンドウを非表示にし、他のウィンドウをアクティブにします。
+        const int SW_SHOWNORMAL = 1;        //ウィンドウをアクティブにして表示します。ウィンドウが最小化または最大化されていた場合は、その位置とサイズを元に戻します。
+        const int SW_SHOWMINIMIZED = 2;     //ウィンドウをアクティブにして、最小化します。
+        const int SW_SHOWMAXIMIZED = 3;     //ウィンドウをアクティブにして、最大化します。
+        const int SW_MAXIMIZE = 3;          //ウィンドウを最大化します。
+        const int SW_SHOWNOACTIVATE = 4;    //ウィンドウを直前の位置とサイズで表示します。
+        const int SW_SHOW = 5;              //ウィンドウをアクティブにして、現在の位置とサイズで表示します。
+        const int SW_MINIMIZE = 6;          //ウィンドウを最小化し、Z オーダーが次のトップレベルウィンドウをアクティブにします。
+        const int SW_SHOWMINNOACTIVE = 7;   //ウィンドウを最小化します。(アクティブにはしない)
+        const int SW_SHOWNA = 8;            //ウィンドウを現在のサイズと位置で表示します。(アクティブにはしない)
+        const int SW_RESTORE = 9;           //ウィンドウをアクティブにして表示します。最小化または最大化されていたウィンドウは、元の位置とサイズに戻ります。
+        const int SW_SHOWDEFAULT = 10;      //アプリケーションを起動したプログラムが 関数に渡した 構造体で指定された SW_ フラグに従って表示状態を設定します。
+        const int SW_FORCEMINIMIZE = 11;    //たとえウィンドウを所有するスレッドがハングしていても、ウィンドウを最小化します。このフラグは、ほかのスレッドのウィンドウを最小化する場合にだけ使用してください。
         #endregion
 
         #region Declaration
@@ -157,11 +180,26 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// <param name="inde"></param>
         public void CloseApp(int index) {
             var process = ItemList[index].AppProcess;
-            process.Refresh();
-            if (process.HasExited) {
-                process.CloseMainWindow();
-                process.Close();
+            const uint STILL_ACTIVE = 0x00000103;
+
+            uint exitCode;
+            GetExitCodeThread(process.Handle, out exitCode);
+            if (exitCode == STILL_ACTIVE) {
+                PostThreadMessage(process.Id, WM_QUIT, 0, 0);
+
+                if (WaitForSingleObject(g_WindowInfo[i].Thread.hThread, THREAD_TIMEOUT) == WAIT_TIMEOUT) {
+                    TerminateThread(process.Handle, 0);
+                }
+                CloseHandle(process.Handle);
             }
+
+            CloseHandle(ItemList[index].AppProcess.Handle);
+
+            //process.Refresh();
+            //if (process.HasExited) {
+            //    process.CloseMainWindow();
+            //    process.Close();
+            //}
 
             //this.ItemList[index].AppProcess.CloseMainWindow();
             //this.ItemList[index].AppProcess.Close();
@@ -263,7 +301,10 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// </summary>
         /// <param name="index"></param>
         private void TaskItemClick(int index) {
+            // 最小化されているかは判断せずに処理
+            ShowWindow(this.ItemList[index].Handle, SW_RESTORE);
             Win32APIs.SetForegroundWindow(this.ItemList[index].Handle);
+
             this.OnTaskItemClickCallback?.Invoke(this, new EventArgs());
         }
 
