@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Media.Imaging;
@@ -23,8 +24,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern int GetWindowTextLength(IntPtr hWnd);
 
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+        //[DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        //private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         [DllImport("user32.dll")]
         private static extern bool GetWindowRect(IntPtr hwnd, out RECT lpRect);
@@ -44,30 +45,30 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         [DllImport("User32.Dll")]
         private static extern IntPtr GetParent(IntPtr hWnd);
 
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern int GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
+        //[DllImport("user32.dll", SetLastError = true)]
+        //private static extern int GetWindowInfo(IntPtr hwnd, ref WINDOWINFO pwi);
 
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
-        [DllImport("kernel32.dll")]
-        private static extern bool CloseHandle(IntPtr hHandle);
+        //[DllImport("kernel32.dll")]
+        //private static extern bool CloseHandle(IntPtr hHandle);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         static extern int ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("kernel32.dll")]
-        static extern bool GetExitCodeThread(IntPtr hThread, out uint lpExitCode);
+        //[DllImport("kernel32.dll")]
+        //static extern bool GetExitCodeThread(IntPtr hThread, out uint lpExitCode);
 
-        [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool PostThreadMessage(uint threadId, int msg, IntPtr wParam, IntPtr lParam);
+        //[return: MarshalAs(UnmanagedType.Bool)]
+        //[DllImport("user32.dll", SetLastError = true)]
+        //public static extern bool PostThreadMessage(uint threadId, int msg, IntPtr wParam, IntPtr lParam);
 
-        [DllImport("kernel32.dll")]
-        internal static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+        //[DllImport("kernel32.dll")]
+        //internal static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
 
-        [DllImport("kernel32.dll")]
-        private static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
+        //[DllImport("kernel32.dll")]
+        //private static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         private static extern IntPtr PostMessage(IntPtr hWnd, IntPtr Msg, IntPtr wParam, IntPtr lParam);
@@ -122,24 +123,24 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const long WS_EX_NOREDIRECTIONBITMAP = 0x00200000L;
         private const int GW_OWNER = 4;
-        private const int WM_QUIT = 0x0012;
-        private const int THREAD_TIMEOUT = 1000;
-        private const long WAIT_TIMEOUT = 258L;
+        //private const int WM_QUIT = 0x0012;
+        //private const int THREAD_TIMEOUT = 1000;
+        //private const long WAIT_TIMEOUT = 258L;
         const int WM_CLOSE = 0x0010;
 
-        const int SW_HIDE = 0;              //ウィンドウを非表示にし、他のウィンドウをアクティブにします。
-        const int SW_SHOWNORMAL = 1;        //ウィンドウをアクティブにして表示します。ウィンドウが最小化または最大化されていた場合は、その位置とサイズを元に戻します。
-        const int SW_SHOWMINIMIZED = 2;     //ウィンドウをアクティブにして、最小化します。
-        const int SW_SHOWMAXIMIZED = 3;     //ウィンドウをアクティブにして、最大化します。
-        const int SW_MAXIMIZE = 3;          //ウィンドウを最大化します。
-        const int SW_SHOWNOACTIVATE = 4;    //ウィンドウを直前の位置とサイズで表示します。
-        const int SW_SHOW = 5;              //ウィンドウをアクティブにして、現在の位置とサイズで表示します。
-        const int SW_MINIMIZE = 6;          //ウィンドウを最小化し、Z オーダーが次のトップレベルウィンドウをアクティブにします。
-        const int SW_SHOWMINNOACTIVE = 7;   //ウィンドウを最小化します。(アクティブにはしない)
-        const int SW_SHOWNA = 8;            //ウィンドウを現在のサイズと位置で表示します。(アクティブにはしない)
+        //const int SW_HIDE = 0;              //ウィンドウを非表示にし、他のウィンドウをアクティブにします。
+        //const int SW_SHOWNORMAL = 1;        //ウィンドウをアクティブにして表示します。ウィンドウが最小化または最大化されていた場合は、その位置とサイズを元に戻します。
+        //const int SW_SHOWMINIMIZED = 2;     //ウィンドウをアクティブにして、最小化します。
+        //const int SW_SHOWMAXIMIZED = 3;     //ウィンドウをアクティブにして、最大化します。
+        //const int SW_MAXIMIZE = 3;          //ウィンドウを最大化します。
+        //const int SW_SHOWNOACTIVATE = 4;    //ウィンドウを直前の位置とサイズで表示します。
+        //const int SW_SHOW = 5;              //ウィンドウをアクティブにして、現在の位置とサイズで表示します。
+        //const int SW_MINIMIZE = 6;          //ウィンドウを最小化し、Z オーダーが次のトップレベルウィンドウをアクティブにします。
+        //const int SW_SHOWMINNOACTIVE = 7;   //ウィンドウを最小化します。(アクティブにはしない)
+        //const int SW_SHOWNA = 8;            //ウィンドウを現在のサイズと位置で表示します。(アクティブにはしない)
         const int SW_RESTORE = 9;           //ウィンドウをアクティブにして表示します。最小化または最大化されていたウィンドウは、元の位置とサイズに戻ります。
-        const int SW_SHOWDEFAULT = 10;      //アプリケーションを起動したプログラムが 関数に渡した 構造体で指定された SW_ フラグに従って表示状態を設定します。
-        const int SW_FORCEMINIMIZE = 11;    //たとえウィンドウを所有するスレッドがハングしていても、ウィンドウを最小化します。このフラグは、ほかのスレッドのウィンドウを最小化する場合にだけ使用してください。
+        //const int SW_SHOWDEFAULT = 10;      //アプリケーションを起動したプログラムが 関数に渡した 構造体で指定された SW_ フラグに従って表示状態を設定します。
+        //const int SW_FORCEMINIMIZE = 11;    //たとえウィンドウを所有するスレッドがハングしていても、ウィンドウを最小化します。このフラグは、ほかのスレッドのウィンドウを最小化する場合にだけ使用してください。
         #endregion
 
         #region Declaration
@@ -180,7 +181,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public void GetTasks() {
             this.ItemList.Clear();
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
-            // Array.Sort(this.ItemList,);
+            this.ItemList = new ObservableCollection<TaskItem>(this.ItemList.OrderBy(n => n.SortKey));
+            base.SetProperty(nameof(this.ItemList));
         }
 
         /// <summary>
@@ -196,37 +198,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// </summary>
         /// <param name="inde"></param>
         public void CloseApp(int index) {
-
-            // PostMessage(ItemList[index].Handle, (IntPtr)WM_QUIT, (IntPtr)0, (IntPtr)0);
             PostMessage(ItemList[index].Handle, (IntPtr)WM_CLOSE, (IntPtr)0, (IntPtr)0);
-
-            // #######################################
-            //// var process = ItemList[index].AppProcess;
-            //var handle = ItemList[index].AppProcessId;
-            //const uint STILL_ACTIVE = 0x00000103;
-
-            //uint exitCode;
-            //GetExitCodeThread((IntPtr)handle, out exitCode);
-            //if (exitCode == STILL_ACTIVE) {
-            //    PostThreadMessage((uint)handle, WM_QUIT, (IntPtr)0, (IntPtr)0);
-
-            //    if (WaitForSingleObject((IntPtr)handle, THREAD_TIMEOUT) == WAIT_TIMEOUT) {
-            //        TerminateThread((IntPtr)handle, 0);
-            //    }
-            //    CloseHandle((IntPtr)handle);
-            //} else {
-            //    CloseHandle((IntPtr)handle);
-            //}
-
-            // #######################################
-            //process.Refresh();
-            //if (process.HasExited) {
-            //    process.CloseMainWindow();
-            //    process.Close();
-            //}
-
-            //this.ItemList[index].AppProcess.CloseMainWindow();
-            //this.ItemList[index].AppProcess.Close();
         }
 
         #endregion
@@ -258,9 +230,10 @@ namespace MyTaskSwitcher.UI.TaskGrid {
 
                 StringBuilder tsb = new StringBuilder(textLen + 1);
                 GetWindowText(hWnd, tsb, tsb.Capacity);
-                var item = new TaskItem(hWnd, tsb.ToString());
-                item.AppProcess = Process.GetProcessById(processID);        // プロセスID→プロセス
-                item.AppProcessId = processID;
+                var item = new TaskItem(hWnd, tsb.ToString()) {
+                    AppProcess = Process.GetProcessById(processID),        // プロセスID→プロセス
+                    AppProcessId = processID
+                };
                 try {
                     item.SortKey = item.AppProcess.MainModule.FileName;
                 } catch (Exception ex) {

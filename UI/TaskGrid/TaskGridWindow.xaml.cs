@@ -34,9 +34,14 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     break;
                 case Key.Delete:
                     e.Handled = true;
+                    var selectedIndex = this.cTaskList.SelectedIndex;
                     this._viewModel.CloseApp(this.cTaskList.SelectedIndex);
-                    //this._viewModel.GetTasks();
-                    //this.SetListViewFocus();
+                    this._viewModel.GetTasks();
+                    selectedIndex--;
+                    if (selectedIndex < 0) {
+                        selectedIndex = 0;
+                    }
+                    this.SetListViewFocus(selectedIndex);
                     break;
             }
         }
@@ -132,11 +137,11 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// <summary>
         /// 
         /// </summary>
-        private void SetListViewFocus() {
+        private void SetListViewFocus(int index = 0) {
             if (0 == this.cTaskList.Items.Count) {
                 return;
             }
-            this.cTaskList.SelectedIndex = 0;
+            this.cTaskList.SelectedIndex = index;
             this.cTaskList.Focus();
             DoEvents();
             var item = (ListViewItem)(this.cTaskList.ItemContainerGenerator.ContainerFromItem(cTaskList.SelectedItem));
@@ -144,7 +149,6 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                 item.Focus();
                 DoEvents();
             }
-
         }
 
         private void DoEvents() {

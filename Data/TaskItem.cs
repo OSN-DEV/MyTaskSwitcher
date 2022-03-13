@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Collections;
 
 namespace MyTaskSwitcher.Data {
     public class TaskItem {
