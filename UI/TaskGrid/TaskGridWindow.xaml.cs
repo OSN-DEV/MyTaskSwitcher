@@ -35,8 +35,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                 case Key.Delete:
                     e.Handled = true;
                     this._viewModel.CloseApp(this.cTaskList.SelectedIndex);
-                    this._viewModel.GetTasks();
-                    this.SetListViewFocus();
+                    //this._viewModel.GetTasks();
+                    //this.SetListViewFocus();
                     break;
             }
         }

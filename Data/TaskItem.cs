@@ -34,6 +34,12 @@ namespace MyTaskSwitcher.Data {
         public Process AppProcess { set; get; }
 
         /// <summary>
+        /// process
+        /// </summary>
+        public int AppProcessId { set; get; }
+
+
+        /// <summary>
         /// 
         /// </summary>
         public string SortKey { set; get; }

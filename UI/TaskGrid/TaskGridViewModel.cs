@@ -59,6 +59,19 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         [DllImport("kernel32.dll")]
         static extern bool GetExitCodeThread(IntPtr hThread, out uint lpExitCode);
 
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool PostThreadMessage(uint threadId, int msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll")]
+        internal static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMilliseconds);
+
+        [DllImport("kernel32.dll")]
+        private static extern bool TerminateThread(IntPtr hThread, uint dwExitCode);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr PostMessage(IntPtr hWnd, IntPtr Msg, IntPtr wParam, IntPtr lParam);
+
         private delegate bool EnumWindowsDelegate(IntPtr hWnd, IntPtr lparam);
 
 
@@ -109,6 +122,10 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         private const int WS_EX_TOOLWINDOW = 0x00000080;
         private const long WS_EX_NOREDIRECTIONBITMAP = 0x00200000L;
         private const int GW_OWNER = 4;
+        private const int WM_QUIT = 0x0012;
+        private const int THREAD_TIMEOUT = 1000;
+        private const long WAIT_TIMEOUT = 258L;
+        const int WM_CLOSE = 0x0010;
 
         const int SW_HIDE = 0;              //ウィンドウを非表示にし、他のウィンドウをアクティブにします。
         const int SW_SHOWNORMAL = 1;        //ウィンドウをアクティブにして表示します。ウィンドウが最小化または最大化されていた場合は、その位置とサイズを元に戻します。
@@ -179,22 +196,29 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         /// </summary>
         /// <param name="inde"></param>
         public void CloseApp(int index) {
-            var process = ItemList[index].AppProcess;
-            const uint STILL_ACTIVE = 0x00000103;
 
-            uint exitCode;
-            GetExitCodeThread(process.Handle, out exitCode);
-            if (exitCode == STILL_ACTIVE) {
-                PostThreadMessage(process.Id, WM_QUIT, 0, 0);
+            // PostMessage(ItemList[index].Handle, (IntPtr)WM_QUIT, (IntPtr)0, (IntPtr)0);
+            PostMessage(ItemList[index].Handle, (IntPtr)WM_CLOSE, (IntPtr)0, (IntPtr)0);
 
-                if (WaitForSingleObject(g_WindowInfo[i].Thread.hThread, THREAD_TIMEOUT) == WAIT_TIMEOUT) {
-                    TerminateThread(process.Handle, 0);
-                }
-                CloseHandle(process.Handle);
-            }
+            // #######################################
+            //// var process = ItemList[index].AppProcess;
+            //var handle = ItemList[index].AppProcessId;
+            //const uint STILL_ACTIVE = 0x00000103;
 
-            CloseHandle(ItemList[index].AppProcess.Handle);
+            //uint exitCode;
+            //GetExitCodeThread((IntPtr)handle, out exitCode);
+            //if (exitCode == STILL_ACTIVE) {
+            //    PostThreadMessage((uint)handle, WM_QUIT, (IntPtr)0, (IntPtr)0);
 
+            //    if (WaitForSingleObject((IntPtr)handle, THREAD_TIMEOUT) == WAIT_TIMEOUT) {
+            //        TerminateThread((IntPtr)handle, 0);
+            //    }
+            //    CloseHandle((IntPtr)handle);
+            //} else {
+            //    CloseHandle((IntPtr)handle);
+            //}
+
+            // #######################################
             //process.Refresh();
             //if (process.HasExited) {
             //    process.CloseMainWindow();
@@ -236,7 +260,13 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                 GetWindowText(hWnd, tsb, tsb.Capacity);
                 var item = new TaskItem(hWnd, tsb.ToString());
                 item.AppProcess = Process.GetProcessById(processID);        // プロセスID→プロセス
-                item.SortKey = item.AppProcess.MainModule.FileName;
+                item.AppProcessId = processID;
+                try {
+                    item.SortKey = item.AppProcess.MainModule.FileName;
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
+                    item.SortKey = "";
+                }
                 // プロセス→実行ファイル名→アイコン
                 try {
                     icon = System.Drawing.Icon.ExtractAssociatedIcon(item.AppProcess.MainModule.FileName);
