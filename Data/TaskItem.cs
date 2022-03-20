@@ -39,6 +39,10 @@ namespace MyTaskSwitcher.Data {
         /// </summary>
         public int AppProcessId { set; get; }
 
+        /// <summary>
+        /// display no
+        /// </summary>
+        public string No { set; get; }
 
         /// <summary>
         /// 

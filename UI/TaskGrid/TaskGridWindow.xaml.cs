@@ -1,5 +1,6 @@
 ﻿using OsnCsLib.Common;
 using OsnCsLib.WPFComponent.Control;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -13,17 +14,65 @@ namespace MyTaskSwitcher.UI.TaskGrid {
 
         #region Declaration
         private TaskGridViewModel _viewModel;
+        private string _inputNum = "";
+        private Timer _timer = null;
         #endregion
 
         #region Constructor
         public TaskGridWindow() {
             InitializeComponent();
+            this._timer = new Timer();
+            this._timer.Interval = 1000;
+            this._timer.Enabled = false;
+            this._timer.Elapsed += _timer_Elapsed;
         }
         #endregion
 
         #region Event
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void _timer_Elapsed(object sender, ElapsedEventArgs e) {
+            this._timer.Enabled = false;
+            this._inputNum = "";
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Window_KeyDown(object sender, KeyEventArgs e) {
+            if (!this._viewModel.IsSearchMode && Key.D0 <= e.Key && e.Key <= Key.D9) {
+                e.Handled = true;
+                if (!this._timer.Enabled) {
+                    this._inputNum = "";
+                    this._timer.Enabled = true;
+                }
+                this._inputNum += (e.Key - Key.D0).ToString();
+                if (2 == this._inputNum.Length) {
+                    this._timer.Enabled = false;
+                    var index = int.Parse(this._inputNum);
+                    if (index < this._viewModel.ItemList.Count) {
+                        this.SetListViewFocus(index);
+                    }
+                }
+            }
+
             switch(e.Key) {
+                case Key.F:
+                    if (Util.IsModifierPressed(ModifierKeys.Control)) {
+                        e.Handled = true;
+                        this._viewModel.IsSearchMode = !this._viewModel.IsSearchMode;
+                        if (this._viewModel.IsSearchMode) {
+                            this.cSearchText.Focus();
+                        } else {
+                            this.SetListViewFocus(this.cTaskList.SelectedIndex);
+                        }
+                    }
+                    break;
                 case Key.Escape:
                     e.Handled = true;
                     base.SetWindowsState(true);

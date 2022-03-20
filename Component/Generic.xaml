@@ -11,7 +11,6 @@
 
 
     <!-- Custom Control -->
-
     <Style TargetType="{x:Type l:TaskItemView}">
         <Setter Property="Template">
             <Setter.Value>

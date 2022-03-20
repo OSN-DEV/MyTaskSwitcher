@@ -8,6 +8,7 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace MyTaskSwitcher.UI.TaskGrid {
@@ -162,6 +163,27 @@ namespace MyTaskSwitcher.UI.TaskGrid {
         public ObservableCollection<TaskItem> ItemList { set; get; }
 
         /// <summary>
+        /// search mode
+        /// </summary>
+        private bool _isSearchMode = false;
+        public bool IsSearchMode {
+            set {
+                base.SetProperty(ref this._isSearchMode, value);
+                base.SetProperty(nameof(SeachTextVisibility));
+            }
+            get {
+                return this._isSearchMode;
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public Visibility SeachTextVisibility {
+            get { return this._isSearchMode ? Visibility.Visible : Visibility.Collapsed; }
+        }
+
+        /// <summary>
         /// select item command
         /// </summary>
         public DelegateCommandWithParam<int> TaskItemClickCommand { set; get; }
@@ -182,6 +204,9 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             this.ItemList.Clear();
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
             this.ItemList = new ObservableCollection<TaskItem>(this.ItemList.OrderBy(n => n.SortKey));
+            foreach (var (item, index) in this.ItemList.Select((item, index) => (item, index))) {
+                item.No = index.ToString("00");
+            }
             base.SetProperty(nameof(this.ItemList));
         }
 

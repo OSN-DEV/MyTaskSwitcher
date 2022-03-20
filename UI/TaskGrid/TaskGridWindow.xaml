@@ -50,21 +50,26 @@
             <RowDefinition  Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <ListView Name="cTaskList" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" Width="505">
-        <ListView.ItemContainerStyle>
-            <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
-        </ListView.ItemContainerStyle>
+        <TextBox Name="cSearchText" Grid.Row="0" FontFamily="Meiryo UI" FontSize="14" Padding="2,4" Visibility="{Binding SeachTextVisibility}"/>
+        
+        <ListView Name="cTaskList" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" Width="505" >
+            <ListView.ItemContainerStyle>
+                <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
+            </ListView.ItemContainerStyle>
 
-        <ListView.ItemTemplate>
-            <DataTemplate>
-                <StackPanel Orientation="Horizontal"  >
-                    <Image Grid.Column="0" Grid.Row="0" Width="20" Height="20" Source="{Binding Icon}" Margin="5,0,10,0" />
-                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Title}" Width="430"  
-                               VerticalAlignment="Center"  Margin="0,0,5,0" FontFamily="Meiryo UI" FontSize="14"
-                               TextTrimming="CharacterEllipsis"/>
-                </StackPanel>
-            </DataTemplate>
-        </ListView.ItemTemplate>
-    </ListView>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal"  >
+                        <TextBlock Text="{Binding No}" Width="30"
+                                   VerticalAlignment="Center"  Margin="5,0,0,0" FontFamily="Meiryo UI" FontSize="14"
+                                   Foreground="DarkGray"/>
+                        <Image  Width="20" Height="20" Source="{Binding Icon}" Margin="5,0,10,0" />
+                        <TextBlock  Text="{Binding Title}" Width="400"  
+                                   VerticalAlignment="Center"  Margin="0,0,5,0" FontFamily="Meiryo UI" FontSize="14"
+                                   TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
 </control:ResidentWindow>
