@@ -7,7 +7,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MyTaskSwitcher.UI.TaskGrid"
         mc:Ignorable="d"
-        Title="TaskGridWindow" Height="280" Width="430" MaxHeight="300" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" StateChanged="ResidentWindow_StateChanged">
+        Title="TaskGridWindow" Height="400" Width="500"  ResizeMode="NoResize" WindowStartupLocation="CenterScreen" KeyDown="Window_KeyDown" StateChanged="ResidentWindow_StateChanged">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -50,7 +50,7 @@
             <RowDefinition  Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-    <ListView Name="cTaskList" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" Width="435">
+        <ListView Name="cTaskList" Grid.Row="1" Padding="0" ItemsSource="{Binding ItemList}" Width="505">
         <ListView.ItemContainerStyle>
             <Style BasedOn="{StaticResource listBoxItemStyle}" TargetType="ListBoxItem" />
         </ListView.ItemContainerStyle>
@@ -59,7 +59,7 @@
             <DataTemplate>
                 <StackPanel Orientation="Horizontal"  >
                     <Image Grid.Column="0" Grid.Row="0" Width="20" Height="20" Source="{Binding Icon}" Margin="5,0,10,0" />
-                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Title}" Width="360"  
+                    <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding Title}" Width="430"  
                                VerticalAlignment="Center"  Margin="0,0,5,0" FontFamily="Meiryo UI" FontSize="14"
                                TextTrimming="CharacterEllipsis"/>
                 </StackPanel>
