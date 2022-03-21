@@ -198,6 +198,7 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                 item.Focus();
                 DoEvents();
             }
+            this.cTaskList.ScrollIntoView(this.cTaskList.SelectedItem);
         }
 
         private void DoEvents() {
