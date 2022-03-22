@@ -85,6 +85,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     e.Handled = true;
                     var selectedIndex = this.cTaskList.SelectedIndex;
                     this._viewModel.CloseApp(this.cTaskList.SelectedIndex);
+                    System.Threading.Thread.Sleep(100);
+                    this.DoEvents();
                     this._viewModel.GetTasks();
                     selectedIndex--;
                     if (selectedIndex < 0) {
