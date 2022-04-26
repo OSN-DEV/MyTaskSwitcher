@@ -73,6 +73,12 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                         }
                     }
                     break;
+                case Key.R:
+                    if (Util.IsModifierPressed(ModifierKeys.Control)) {
+                        e.Handled = true;
+                        this._viewModel.GetTasks();
+                    }
+                    break;
                 case Key.Escape:
                     e.Handled = true;
                     base.SetWindowsState(true);
@@ -85,7 +91,9 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     e.Handled = true;
                     var selectedIndex = this.cTaskList.SelectedIndex;
                     this._viewModel.CloseApp(this.cTaskList.SelectedIndex);
+                    this.DoEvents();
                     this._viewModel.GetTasks();
+                    this.DoEvents();
                     selectedIndex--;
                     if (selectedIndex < 0) {
                         selectedIndex = 0;
