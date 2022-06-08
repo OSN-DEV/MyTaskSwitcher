@@ -52,11 +52,21 @@ namespace MyTaskSwitcher.UI.TaskGrid {
                     this._timer.Enabled = true;
                 }
                 this._inputNum += (e.Key - Key.D0).ToString();
+                if (1 == this._inputNum.Length) {
+                    var index = int.Parse(this._inputNum);
+                    if (1 <= index && index <= 9)
+                        this._timer.Enabled = false;
+                        if (index < this._viewModel.ItemList.Count + 1) {
+                            this.SetListViewFocus(index - 1);
+                            return;
+                        }
+                }
                 if (2 == this._inputNum.Length) {
                     this._timer.Enabled = false;
                     var index = int.Parse(this._inputNum);
-                    if (index < this._viewModel.ItemList.Count) {
-                        this.SetListViewFocus(index);
+                    if (index < this._viewModel.ItemList.Count + 1) {
+                        this.SetListViewFocus(index - 1);
+                        return;
                     }
                 }
             }

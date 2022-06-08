@@ -205,7 +205,8 @@ namespace MyTaskSwitcher.UI.TaskGrid {
             EnumWindows(new EnumWindowsDelegate(EnumWindowCallBack), IntPtr.Zero);
             this.ItemList = new ObservableCollection<TaskItem>(this.ItemList.OrderBy(n => n.SortKey));
             foreach (var (item, index) in this.ItemList.Select((item, index) => (item, index))) {
-                item.No = index.ToString("00");
+                //item.No = index.ToString("00");
+                item.No = (index+1).ToString("");
             }
             base.SetProperty(nameof(this.ItemList));
         }
